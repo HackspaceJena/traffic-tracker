@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# config
+TMaxFile=/etc/traffic_limit
+BytesPerCent=5368709 # 1 GiB for 2 EUR
+
+# annoy user
+echo "How many CENT have you donated to the collecting box?"
+read Donation
+
+# check value sanity
+if [ "$Donation" -lt 0 ] 2>/dev/null || [ $? -eq 2 ]; then
+	echo "$Donation does not look #like a sane number"
+	exit -1
+fi
+
+# calc and store new value
+BytesDonated=$(( $Donation *  $BytesPerCent ))
+TMax=$(cat $TMaxFile || echo 0)
+TMax=$((TMax + $BytesDonated))
+echo $TMax > $TMaxFile
+
+# TODO: log donation
+# TODO: log remote, once connection is up
+
+# cheer user up
+echo "You have donated $((BytesDonated / 1024 / 1024)) MB." \
+     "The new limit is $((TMax / 1024 / 1024)) MB."

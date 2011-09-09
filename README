@@ -1,0 +1,21 @@
+Track traffic across interface and device restarts and limit
+consumption to a donation-backed amount.
+
+To increase SSD lifetime persistent storage is only touched every
+$MaxPerTrafficDiff bytes (currently 100 MB). So tracking can be
+trivially avoided by frequent router reboot.
+
+* Usage
+  - call traffic_track via cron as often as possible
+  - call traffic_account_donation to increase the traffic limit
+    after you put the coin in the treasure chest
+
+* Internals
+** Counters
+   - Max :: traffic limit
+   - Per :: traffic accounted to disk
+   - Eph :: traffic acounted to /tmp
+   - Cur :: traffic directly obtained from `ip -s`
+   - Obs :: part of Cur already accounted
+** Caveats
+  - scripts are non-reentrant

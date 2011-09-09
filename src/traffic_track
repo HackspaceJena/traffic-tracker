@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# config
+IF=eth0.1
+TMaxFile=/etc/traffic_limit
+TPerFile=/etc/traffic_consumed
+TEphFile=/tmp/traffic_to_be_accounted
+TObsFile=/tmp/traffic_observed_since_ifup
+
+# TODO: MaxPerTimeGap=3600
+MaxPerTrafficDiff=$((100 * 1024 * 1024))
+
+# gather different traffic counters
+TMax=$(cat $TMaxFile 2>/dev/null || echo 0)
+TPer=$(cat $TPerFile 2>/dev/null || echo 0)
+TEph=$(cat $TEphFile 2>/dev/null || echo 0)
+TObs=$(cat $TObsFile 2>/dev/null || echo 0)
+TCur=$((
+	$(ip -s link show eth0.1 \
+	| awk '{ if (FNR == 4) print $1 " + "; if (FNR == 6) print $1 }' \
+	| tr -d "\n")
+	))
+# test for invalid cur values (negative number or invalid number format (ret=2))
+if [ "$TCur" -lt 0 ] 2>/dev/null || [ $? -eq 2 ]; then
+	# TODO: log error
+	exit -1
+fi
+	
+
+# update traffic counters
+UpdatePer=false
+if [ $TCur -lt $TObs ]; then
+	# interface counter has been reset
+	TEph=$(($TEph + $TCur))
+	# TODO: log warning
+else
+	TEph=$(($TEph + $TCur - $TObs))
+fi
+TObs=$TCur
+TPer=$(($TPer + $TEph))
+# TODO: also lock _once_ if TPer exceeds TMax
+if [ $TEph -gt $MaxPerTrafficDiff ]; then
+	TEph=0
+	echo $TPer > $TPerFile
+fi
+echo $TEph > $TEphFile
+echo $TObs > $TObsFile
+
+# act if traffic max is reached
+if [ $TPer -gt $TMax ]; then
+	echo "TODO: shut down internet interface"
+fi
