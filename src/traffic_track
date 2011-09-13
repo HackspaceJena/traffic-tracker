@@ -16,7 +16,7 @@ TPer=$(cat $TPerFile 2>/dev/null || echo 0)
 TEph=$(cat $TEphFile 2>/dev/null || echo 0)
 TObs=$(cat $TObsFile 2>/dev/null || echo 0)
 TCur=$((
-	$(ip -s link show eth0.1 \
+	$(ip -s link show $IF \
 	| awk '{ if (FNR == 4) print $1 " + "; if (FNR == 6) print $1 }' \
 	| tr -d "\n")
 	))
@@ -48,5 +48,7 @@ echo $TObs > $TObsFile
 
 # act if traffic max is reached
 if [ $TPer -gt $TMax ]; then
-	echo "TODO: shut down internet interface"
+	tc qdisc add dev $IF root tbf rate 80kbit latency 50ms burst 3000
+else
+	tc qdisc del dev $IF root
 fi
