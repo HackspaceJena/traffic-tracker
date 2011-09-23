@@ -1,20 +1,8 @@
 #!/bin/sh
 
-# config
-IF=eth0.1
-TMaxFile=/etc/traffic_limit
-TPerFile=/etc/traffic_consumed
-TEphFile=/tmp/traffic_to_be_accounted
-TObsFile=/tmp/traffic_observed_since_ifup
+source $(dirname $0)/traffic_common.sh	
 
-# TODO: MaxPerTimeGap=3600
-MaxPerTrafficDiff=$((100 * 1024 * 1024))
-
-# gather different traffic counters
-TMax=$(cat $TMaxFile 2>/dev/null || echo 0)
-TPer=$(cat $TPerFile 2>/dev/null || echo 0)
-TEph=$(cat $TEphFile 2>/dev/null || echo 0)
-TObs=$(cat $TObsFile 2>/dev/null || echo 0)
+# update traffic counters
 TCur=$((
 	$(ip -s link show $IF \
 	| awk '{ if (FNR == 4) print $1 " + "; if (FNR == 6) print $1 }' \
@@ -25,9 +13,6 @@ if [ "$TCur" -lt 0 ] 2>/dev/null || [ $? -eq 2 ]; then
 	# TODO: log error
 	exit -1
 fi
-	
-
-# update traffic counters
 UpdatePer=false
 if [ $TCur -lt $TObs ]; then
 	# interface counter has been reset
@@ -38,8 +23,8 @@ else
 fi
 TObs=$TCur
 TPer=$(($TPer + $TEph))
-# TODO: also lock _once_ if TPer exceeds TMax
 if [ $TEph -gt $MaxPerTrafficDiff ]; then
+        # TODO: log _once_ if TPer exceeds TMax
 	TEph=0
 	echo $TPer > $TPerFile
 fi
