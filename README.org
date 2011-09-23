@@ -7,6 +7,7 @@ trivially avoided by frequent router reboot.
 
 * Usage
   - call traffic_track via cron as often as possible
+  - call traffic_status to see the different bandwith counters
   - call traffic_account_donation to increase the traffic limit
     after you put the coin in the treasure chest
 
