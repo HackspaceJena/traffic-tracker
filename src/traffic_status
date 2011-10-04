@@ -2,9 +2,15 @@
 
 source $(dirname $0)/traffic_common.sh
 
+balance=$((($TPer + $TEph - $TMax) / $BytesPerCent))
+
 echo -e \
 "Consumed: $((($TPer + $TEph) / 1024 / 1024)) MB
          ($(($TPer / 1024 / 1024)) MB accounted to disk)
-Limit:    $(($TMax / 1024 / 1024)) MB
+Limit:    $(($TMax / 1024 / 1024)) MB"
 
-Please donate $(($(($TPer + TEph)) / $BytesPerCent)) cent."
+if [ "$balance" -lt 0 ]; then
+    echo "There are $(($balance * -1 ))ct left"
+else
+    echo "Please donate $balance cent."
+fi
