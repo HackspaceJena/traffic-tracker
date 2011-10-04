@@ -4,7 +4,7 @@ TMaxFile=/etc/traffic_limit
 TPerFile=/etc/traffic_consumed
 TEphFile=/tmp/traffic_to_be_accounted
 TObsFile=/tmp/traffic_observed_since_ifup
-BytesPerCent=5368709 # 1 GiB for 2 EUR
+BytesPerCent=5368709 # 1 GiB for 2EUR
 
 # TODO: MaxPerTimeGap=3600
 MaxPerTrafficDiff=$((100 * 1024 * 1024))
