@@ -3,8 +3,8 @@
 source $(dirname $0)/traffic_common.sh
 
 echo -e \
-"Consumed: $(($TPer + $TEph)) B 
-         ($TPer B accounted to disk)
-Limit:    $TMax B
+"Consumed: $((($TPer + $TEph) / 1024 / 1024)) MB
+         ($(($TPer / 1024 / 1024)) MB accounted to disk)
+Limit:    $(($TMax / 1024 / 1024)) MB
 
 Please donate $(($(($TPer + TEph)) / $BytesPerCent)) cent."
